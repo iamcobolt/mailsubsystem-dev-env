@@ -1,0 +1,20 @@
+.env
+.env.local
+.env.*.local
+
+# Generated local TLS material
+dovecot/certs/
+
+# Local scratch data
+logs/
+__pycache__/
+*.pyc
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/

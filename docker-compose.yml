@@ -1,0 +1,49 @@
+# MailSubsystem development environment
+# PostgreSQL with pgvector plus a local Dovecot IMAP sandbox.
+#
+# Recommended:
+#   make start
+#
+# Direct compose users must run `make certs` first so Dovecot starts with a
+# certificate trusted by the generated MailSubsystem environment.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: mailsubsystem-dev-db
+    ports:
+      - "${MAILSUBSYSTEM_DB_PORT:-15432}:5432"
+    environment:
+      POSTGRES_DB: mailsubsystem
+      POSTGRES_USER: mailsubsystem
+      POSTGRES_PASSWORD: mailsubsystem
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ${MAILSUBSYSTEM_CORE_DIR:-../MailSubsystem}/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mailsubsystem -d mailsubsystem"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  imap:
+    image: dovecot/dovecot:2.3.21
+    container_name: mailsubsystem-dev-imap
+    profiles:
+      - sandbox
+    ports:
+      - "${SANDBOX_IMAPS_PORT:-1993}:993"
+      - "${SANDBOX_IMAP_PORT:-1143}:143"
+    volumes:
+      - ./dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./dovecot/users:/etc/dovecot/users:ro
+      - ./dovecot/entrypoint.sh:/entrypoint.sh:ro
+      - ./dovecot/certs:/etc/dovecot/certs:ro
+      - imap-data:/var/mail
+    entrypoint: /entrypoint.sh
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  imap-data:
