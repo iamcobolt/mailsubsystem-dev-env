@@ -72,6 +72,19 @@ SANDBOX_IMAP_PORT=1143
 of copying it into this repo. That keeps the database schema tied to the
 MailSubsystem checkout you are testing.
 
+### Environment Files
+
+This repo has its own `.env` for Docker Compose and sandbox service wiring. It
+does not configure the MailSubsystem Rust app directly.
+
+| File | Owner | Purpose |
+|------|-------|---------|
+| `mailsubsystem-dev-env/.env` | Dev environment | Docker Compose ports, sandbox IMAP credentials, and the path to the MailSubsystem core checkout |
+| `MailSubsystem/.env` | Core app | `IMAP_SERVER`, `IMAP_USERNAME`, `IMAP_PASSWORD`, `IMAP_TLS_CA_CERT_FILE`, `DATABASE_URL`, and AI provider keys |
+
+Run `make core-env` when you want this repo to generate the app-facing sandbox
+configuration in the core checkout.
+
 ## Commands
 
 ```bash
